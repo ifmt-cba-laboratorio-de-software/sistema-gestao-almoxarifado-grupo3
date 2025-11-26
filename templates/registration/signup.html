@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block title %}Cadastro de usuários • Sistema de Almoxarifado{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-9">
+    <div class="card border-0 shadow-sm rounded-4">
+      <div class="card-body p-4 p-lg-5">
+        <div class="d-flex flex-column flex-lg-row justify-content-between gap-3 mb-4">
+          <div>
+            <span class="badge text-bg-primary-subtle text-primary">Administração</span>
+            <h2 class="fw-bold mt-2 mb-1">Cadastrar novo usuário</h2>
+            <p class="text-muted mb-0">
+              Utilize este formulário para liberar acesso ao painel para colegas do projeto.
+            </p>
+          </div>
+          <div class="bg-light rounded-4 p-3 small text-muted">
+            <strong>Regras rápidas:</strong>
+            <ul class="ps-3 mb-0">
+              <li>Todas as informações são obrigatórias.</li>
+              <li>Use e-mail institucional ou válido.</li>
+              <li>Compartilhe o usuário/ senha com o integrante após o cadastro.</li>
+            </ul>
+          </div>
+        </div>
+
+        {% if form.non_field_errors %}
+        <div class="alert alert-danger">
+          {% for error in form.non_field_errors %}
+            <div>{{ error }}</div>
+          {% endfor %}
+        </div>
+        {% endif %}
+
+        <form method="post" class="row g-3">
+          {% csrf_token %}
+
+          <div class="col-md-6">
+            <label class="form-label" for="id_first_name">Nome</label>
+            {{ form.first_name }}
+            {% for error in form.first_name.errors %}
+              <div class="text-danger small">{{ error }}</div>
+            {% endfor %}
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label" for="id_last_name">Sobrenome</label>
+            {{ form.last_name }}
+            {% for error in form.last_name.errors %}
+              <div class="text-danger small">{{ error }}</div>
+            {% endfor %}
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label" for="id_email">E-mail</label>
+            {{ form.email }}
+            {% for error in form.email.errors %}
+              <div class="text-danger small">{{ error }}</div>
+            {% endfor %}
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label" for="id_username">Usuário</label>
+            {{ form.username }}
+            <div class="form-text">Recomenda-se formato nome.sobrenome.</div>
+            {% for error in form.username.errors %}
+              <div class="text-danger small">{{ error }}</div>
+            {% endfor %}
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label" for="id_password1">Senha</label>
+            {{ form.password1 }}
+            {% for error in form.password1.errors %}
+              <div class="text-danger small">{{ error }}</div>
+            {% endfor %}
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label" for="id_password2">Confirme a senha</label>
+            {{ form.password2 }}
+            {% for error in form.password2.errors %}
+              <div class="text-danger small">{{ error }}</div>
+            {% endfor %}
+          </div>
+
+          <div class="col-12 d-flex justify-content-between align-items-center mt-3">
+            <a class="btn btn-outline-secondary" href="{% url 'index' %}">
+              <i class="bi bi-arrow-left"></i> Voltar ao painel
+            </a>
+            <button type="submit" class="btn btn-primary px-4">
+              <i class="bi bi-person-plus-fill me-1"></i> Salvar usuário
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
