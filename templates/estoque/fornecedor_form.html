@@ -1,36 +1,93 @@
 {% extends 'base.html' %}
 {% load crispy_forms_tags %}
 
+{% block title %}
+  {% if fornecedor %}Editar Fornecedor{% else %}Novo Fornecedor{% endif %} • Almoxarifado
+{% endblock %}
+
 {% block content %}
-<div class="container mt-5">
-  <div class="row justify-content-center">
-    <div class="col-md-8 col-lg-6">
+<div class="row justify-content-center">
+  <div class="col-lg-8 col-xl-7">
 
-      <div class="card shadow-lg border-0 rounded-4">
-        <div class="card-body p-4">
-          <h3 class="text-center mb-4 text-primary fw-bold">
-            {% if fornecedor %} ✏️ Editar Fornecedor
+    <div class="d-flex align-items-center justify-content-between mb-4">
+      <div class="d-flex align-items-center gap-3">
+        <div class="rounded-circle d-flex align-items-center justify-content-center shadow-sm text-white 
+                    {% if fornecedor %}bg-warning{% else %}bg-success{% endif %}" 
+             style="width: 50px; height: 50px; font-size: 1.5rem;">
+          <i class="bi {% if fornecedor %}bi-pencil-square{% else %}bi-truck{% endif %}"></i>
+        </div>
+        <div>
+          <h2 class="fw-bold text-dark mb-0">
+            {% if fornecedor %}Editar Fornecedor{% else %}Novo Fornecedor{% endif %}
+          </h2>
+          <p class="text-muted mb-0 small">
+            {% if fornecedor %}
+              Atualizando dados de parceiro existente
             {% else %}
-              ➕ Novo Fornecedor
+              Cadastrando nova empresa parceira
             {% endif %}
-          </h3>
-
-          <form method="post" novalidate>
-            {% csrf_token %}
-            {{ form|crispy }}
-
-            <div class="d-flex justify-content-between mt-4">
-              <a href="{% url 'fornecedor_list' %}" class="btn btn-outline-secondary"> <i class="bi bi-arrow-left"></i> Cancelar
-              </a>
-              <button type="submit" class="btn btn-primary">
-                <i class="bi bi-save"></i> Salvar
-              </button>
-            </div>
-          </form>
+          </p>
         </div>
       </div>
 
+      <a href="{% url 'fornecedor_list' %}" class="btn btn-outline-secondary border-0 shadow-sm">
+        <i class="bi bi-arrow-left me-1"></i> Voltar
+      </a>
     </div>
+
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden"
+         style="border-top: 5px solid {% if fornecedor %}var(--bs-warning){% else %}var(--bs-success){% endif %} !important;">
+      <div class="card-body p-4 p-lg-5">
+        
+        <form method="post" novalidate>
+          {% csrf_token %}
+          
+          {{ form|crispy }}
+
+          <hr class="my-4 border-light">
+
+          <div class="d-flex justify-content-end gap-2">
+            <a href="{% url 'fornecedor_list' %}" class="btn btn-light text-secondary border-0">
+              Cancelar
+            </a>
+            <button type="submit" class="btn px-4 shadow-sm text-white fw-bold
+                           {% if fornecedor %}btn-warning{% else %}btn-success{% endif %}">
+              <i class="bi bi-save me-1"></i> 
+              {% if fornecedor %}Salvar Alterações{% else %}Salvar Fornecedor{% endif %}
+            </button>
+          </div>
+        </form>
+
+      </div>
+    </div>
+
   </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // 1. Seleciona os campos pelo ID padrão do Django
+    const telefoneInput = document.getElementById('id_telefone');
+    const cnpjInput = document.getElementById('id_cnpj'); // Aproveitando para mascarar o CNPJ também
+
+    // 2. Máscara de Telefone (Híbrida: Fixo ou Celular)
+    if (telefoneInput) {
+      const phoneMask = IMask(telefoneInput, {
+        mask: [
+          { mask: '(00) 0000-0000' },   // Fixo
+          { mask: '(00) 00000-0000' }   // Celular
+        ]
+      });
+    }
+
+    // 3. Máscara de CNPJ (Opcional, mas recomendado)
+    if (cnpjInput) {
+      IMask(cnpjInput, {
+        mask: '00.000.000/0000-00'
+      });
+    }
+  });
+</script>
 {% endblock %}

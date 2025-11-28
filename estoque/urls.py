@@ -4,13 +4,18 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    # Rotas de Item
-    path('', views.index, name='index'),
+    # 1. Rota Principal (Dashboard)
+    path('', views.dashboard, name='dashboard'),
+
+    # 2. Rota para a Lista de Itens (FALTOU ESSA AQUI)
+    path('itens/', views.index, name='index'), 
+
+    # Rotas de CRUD de Item
     path('item/novo/', views.item_create, name='item_create'),
     path('item/<int:pk>/editar/', views.item_edit, name='item_edit'),
     path('item/<int:pk>/excluir/', views.item_delete, name='item_delete'),
     path('item/<int:pk>/', views.item_detail, name='item_detail'),
-    path('buscar/item/', views.buscar_item, name='buscar_item'), # <-- NOVA ROTA
+    path('buscar/item/', views.buscar_item, name='buscar_item'),
 
     # Rota de Movimentação
     path('movimentacao/novo/', views.movimentacao_create, name='movimentacao_create'),
@@ -20,5 +25,5 @@ urlpatterns = [
     path('fornecedor/novo/', views.fornecedor_create, name='fornecedor_create'),
     path('fornecedor/<int:pk>/editar/', views.fornecedor_edit, name='fornecedor_edit'),
     path('fornecedor/<int:pk>/excluir/', views.fornecedor_delete, name='fornecedor_delete'),
-    path('buscar/fornecedor/', views.buscar_fornecedor, name='buscar_fornecedor'), # <-- NOVA ROTA
+    path('buscar/fornecedor/', views.buscar_fornecedor, name='buscar_fornecedor'), 
 ]
