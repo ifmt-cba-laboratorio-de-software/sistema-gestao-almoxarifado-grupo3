@@ -1,37 +1,182 @@
 {% extends 'base.html' %}
 {% load crispy_forms_tags %}
 
+{% block title %}Registrar Movimentação • Almoxarifado{% endblock %}
+
 {% block content %}
-<div class="container mt-5">
-  <div class="row justify-content-center">
-    <div class="col-md-8 col-lg-6">
+<div class="row justify-content-center">
+  <div class="col-xl-8 col-lg-9">
 
-      <div class="card shadow-lg border-0 rounded-4">
-        <div class="card-body p-4">
-          <h3 class="text-center mb-4 text-primary fw-bold">
-            📝 Registrar Movimentação
-          </h3>
+    <div class="text-center mb-5">
+      <h2 class="fw-bold text-dark">Registrar Movimentação</h2>
+      <p class="text-muted">Selecione o tipo de operação para atualizar o estoque.</p>
+    </div>
 
-          <form method="post" novalidate>
-            {% csrf_token %}
-            {{ form|crispy }}
+    <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+      <div id="header-color-bar" class="bg-secondary transition-bg" style="height: 8px;"></div>
+      
+      <div class="card-body p-4 p-lg-5">
+        
+        <form method="post" novalidate id="movimentacao-form">
+          {% csrf_token %}
 
-            <div class="d-flex justify-content-between mt-4">
-              <a href="{% url 'index' %}" class="btn btn-outline-secondary">
-                <i class="bi bi-arrow-left"></i> Cancelar
-              </a>
-              <button type="submit" class="btn btn-primary">
-                <i class="bi bi-check-circle"></i> Registrar
-              </button>
+          <label class="form-label fw-bold mb-3">Qual operação deseja realizar?</label>
+          
+          <div class="d-none">
+            {{ form.tipo }}
+          </div>
+
+          <div class="row g-3 mb-4">
+            
+            <div class="col-6 col-md-3">
+              <input type="radio" class="btn-check" name="tipo_visual" id="opt_entrada" value="ENTRADA" autocomplete="off">
+              <label class="btn btn-outline-light text-dark border w-100 p-3 h-100 d-flex flex-column align-items-center justify-content-center gap-2 rounded-4 card-radio hover-shadow" for="opt_entrada" onclick="setTipo('ENTRADA', 'success')">
+                <div class="icon-box bg-success bg-opacity-10 text-success rounded-circle p-3 mb-1">
+                  <i class="bi bi-box-arrow-in-down fs-4"></i>
+                </div>
+                <span class="fw-bold small">Entrada</span>
+              </label>
             </div>
-          </form>
-        </div>
-      </div>
 
+            <div class="col-6 col-md-3">
+              <input type="radio" class="btn-check" name="tipo_visual" id="opt_saida" value="SAIDA" autocomplete="off">
+              <label class="btn btn-outline-light text-dark border w-100 p-3 h-100 d-flex flex-column align-items-center justify-content-center gap-2 rounded-4 card-radio hover-shadow" for="opt_saida" onclick="setTipo('SAIDA', 'danger')">
+                <div class="icon-box bg-danger bg-opacity-10 text-danger rounded-circle p-3 mb-1">
+                  <i class="bi bi-box-arrow-up fs-4"></i>
+                </div>
+                <span class="fw-bold small">Saída</span>
+              </label>
+            </div>
+
+            <div class="col-6 col-md-3">
+              <input type="radio" class="btn-check" name="tipo_visual" id="opt_retirada" value="RETIRADA" autocomplete="off">
+              <label class="btn btn-outline-light text-dark border w-100 p-3 h-100 d-flex flex-column align-items-center justify-content-center gap-2 rounded-4 card-radio hover-shadow" for="opt_retirada" onclick="setTipo('RETIRADA', 'warning')">
+                <div class="icon-box bg-warning bg-opacity-10 text-warning rounded-circle p-3 mb-1">
+                  <i class="bi bi-clock-history fs-4"></i>
+                </div>
+                <span class="fw-bold small">Retirada Temp.</span>
+              </label>
+            </div>
+
+            <div class="col-6 col-md-3">
+              <input type="radio" class="btn-check" name="tipo_visual" id="opt_devolucao" value="DEVOLUCAO" autocomplete="off">
+              <label class="btn btn-outline-light text-dark border w-100 p-3 h-100 d-flex flex-column align-items-center justify-content-center gap-2 rounded-4 card-radio hover-shadow" for="opt_devolucao" onclick="setTipo('DEVOLUCAO', 'info')">
+                <div class="icon-box bg-info bg-opacity-10 text-info rounded-circle p-3 mb-1">
+                  <i class="bi bi-box-seam fs-4"></i>
+                </div>
+                <span class="fw-bold small">Devolução</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="row g-4">
+            <div class="col-md-8">
+              {{ form.item|as_crispy_field }}
+            </div>
+            <div class="col-md-4">
+              {{ form.quantidade|as_crispy_field }}
+            </div>
+          </div>
+
+          <div class="row mt-3" id="campo-devolucao" style="display: none;">
+            <div class="col-md-12">
+              <div class="p-3 bg-warning bg-opacity-10 rounded-3 border border-warning border-opacity-25">
+                <div class="d-flex align-items-center gap-2 text-warning mb-2">
+                  <i class="bi bi-calendar-event-fill"></i>
+                  <span class="fw-bold small text-uppercase">Previsão de Retorno</span>
+                </div>
+                {{ form.data_devolucao_prevista|as_crispy_field }}
+              </div>
+            </div>
+          </div>
+
+          <hr class="my-4 border-light">
+
+          <div class="d-flex align-items-center justify-content-between">
+            <a href="{% url 'index' %}" class="btn btn-light text-secondary border-0">
+              <i class="bi bi-x-lg me-1"></i> Cancelar
+            </a>
+            
+            <button type="submit" id="btn-submit" class="btn btn-secondary px-5 py-2 shadow-sm fw-bold transition-all" disabled>
+              <span id="btn-text">Selecione o Tipo</span>
+            </button>
+          </div>
+
+        </form>
+
+      </div>
     </div>
   </div>
 </div>
 
-<!-- Bootstrap Icons (para os ícones de botões) -->
-<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+<style>
+  /* Efeito suave ao passar o mouse nos cards */
+  .card-radio:hover {
+    transform: translateY(-2px);
+    border-color: #dee2e6 !important;
+    background-color: #f8f9fa;
+  }
+  /* Estilo do card quando selecionado */
+  .btn-check:checked + .card-radio {
+    border-color: currentColor !important;
+    background-color: #fff;
+    box-shadow: 0 0 0 2px currentColor inset;
+  }
+  /* Transição suave para cores */
+  .transition-bg, .transition-all {
+    transition: all 0.3s ease;
+  }
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Função que gerencia a lógica visual e os dados
+  function setTipo(valor, corBootstrap) {
+    // 1. Atualiza o Select oculto do Django
+    const selectDjango = document.getElementById('id_tipo');
+    selectDjango.value = valor;
+
+    // 2. Atualiza a cor da barra superior
+    const barra = document.getElementById('header-color-bar');
+    barra.className = `transition-bg bg-${corBootstrap}`;
+
+    // 3. Atualiza o Botão de Submit (Cor e Texto)
+    const btn = document.getElementById('btn-submit');
+    btn.className = `btn btn-${corBootstrap} px-5 py-2 shadow-sm fw-bold transition-all`;
+    btn.disabled = false;
+    btn.innerHTML = `<i class="bi bi-check-lg me-2"></i> Confirmar ${valor.charAt(0) + valor.slice(1).toLowerCase()}`;
+
+    // 4. Lógica da Data de Devolução (Mostrar/Ocultar)
+    const divData = document.getElementById('campo-devolucao');
+    if (valor === 'RETIRADA') {
+      $(divData).slideDown(); // Animação do jQuery
+    } else {
+      $(divData).slideUp();
+      // Opcional: Limpar o campo de data se ocultar
+      // document.getElementById('id_data_devolucao_prevista').value = ''; 
+    }
+  }
+
+  // Ao carregar a página (caso tenha erro de validação e o form volte preenchido)
+  document.addEventListener("DOMContentLoaded", function() {
+    const tipoAtual = document.getElementById('id_tipo').value;
+    if (tipoAtual) {
+      // Mapeamento de Cores
+      const cores = {
+        'ENTRADA': 'success',
+        'SAIDA': 'danger',
+        'RETIRADA': 'warning',
+        'DEVOLUCAO': 'info'
+      };
+      
+      // Marca o radio button visualmente
+      const radioBtn = document.querySelector(`input[name="tipo_visual"][value="${tipoAtual}"]`);
+      if (radioBtn) {
+        radioBtn.checked = true;
+        setTipo(tipoAtual, cores[tipoAtual] || 'secondary');
+      }
+    }
+  });
+</script>
 {% endblock %}

@@ -4,7 +4,7 @@ from django.contrib import messages
 from .models import Fornecedor, Item, Movimentacao
 from .forms import FornecedorForm, ItemForm, MovimentacaoForm
 from django.core.paginator import Paginator
-from django.db.models import Q
+from django.db.models import Q, Sum, F
 
 
 @login_required
@@ -166,3 +166,41 @@ def buscar_fornecedor(request):
 
     # Renderiza APENAS o template parcial
     return render(request, 'estoque/partials/tabela_fornecedores.html', {'fornecedores': fornecedores})
+
+@login_required
+def dashboard(request):
+    # 1. KPIs (Indicadores Principais)
+    total_itens = Item.objects.count()
+    
+    # Itens onde a quantidade atual é menor ou igual ao mínimo definido
+    itens_criticos = Item.objects.filter(quantidade_atual__lte=F('estoque_minimo')).count()
+    
+    # Valor financeiro total (Soma de Qtd * Preço Unitário de cada item)
+    valor_total_estoque = Item.objects.aggregate(
+        total=Sum(F('quantidade_atual') * F('valor_unitario'))
+    )['total'] or 0
+
+    # 2. Dados para o Gráfico (Top 5 itens com maior estoque)
+    # Buscamos os objetos do banco
+    itens_grafico = Item.objects.order_by('-quantidade_atual')[:5]
+    
+    # [MELHORIA] Criamos as listas limpas aqui no Python para o Chart.js
+    # Isso evita aquele erro vermelho no VS Code e deixa o template mais limpo
+    grafico_labels = [item.descricao for item in itens_grafico]
+    grafico_data = [item.quantidade_atual for item in itens_grafico]
+
+    # 3. Feed de Atividades (Últimas 6 movimentações)
+    # O select_related otimiza a busca trazendo os dados do Item e Usuario juntos
+    ultimas_movimentacoes = Movimentacao.objects.select_related('item', 'usuario').order_by('-data')[:6]
+
+    context = {
+        'total_itens': total_itens,
+        'itens_criticos': itens_criticos,
+        'valor_total_estoque': valor_total_estoque,
+        'ultimas_movimentacoes': ultimas_movimentacoes,
+        # Passamos as listas prontas para o gráfico
+        'grafico_labels': grafico_labels,
+        'grafico_data': grafico_data,
+    }
+    
+    return render(request, 'estoque/dashboard.html', context)

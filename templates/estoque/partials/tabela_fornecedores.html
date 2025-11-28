@@ -1,27 +1,82 @@
 {% for fornecedor in fornecedores %}
-<tr class="text-center">
-  <td class="fw-semibold">{{ fornecedor.nome }}</td>
-  <td>{{ fornecedor.cnpj|default:"-" }}</td>
-  <td>{{ fornecedor.telefone|default:"-" }}</td>
-  <td>{{ fornecedor.email|default:"-" }}</td>
+<tr class="bg-white">
+  
+  <td class="ps-4 py-3">
+    <div class="d-flex align-items-center">
+      <div class="rounded-3 bg-info bg-opacity-10 text-info d-flex align-items-center justify-content-center me-3 shadow-sm" style="width: 45px; height: 45px; font-size: 1.2rem;">
+        <i class="bi bi-truck"></i>
+      </div>
+      <div>
+        <div class="fw-bold text-dark mb-0">
+            {{ fornecedor.nome }}
+        </div>
+        {% if fornecedor.cnpj %}
+          <small class="text-muted font-monospace"><i class="bi bi-postcard me-1"></i>{{ fornecedor.cnpj }}</small>
+        {% else %}
+          <small class="text-muted fst-italic">CNPJ não informado</small>
+        {% endif %}
+      </div>
+    </div>
+  </td>
+
   <td>
-    <div class="d-flex justify-content-center gap-2">
-      {% if perms.estoque.change_fornecedor %}
-        <a class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1" href="{% url 'fornecedor_edit' fornecedor.pk %}">
-          <i class="bi bi-pencil-square"></i> Editar
+    {% if fornecedor.contato %}
+      <div class="d-flex align-items-center text-secondary">
+        <i class="bi bi-person me-2"></i> {{ fornecedor.contato }}
+      </div>
+    {% else %}
+      <span class="text-muted opacity-50">-</span>
+    {% endif %}
+  </td>
+
+  <td>
+    <div class="d-flex flex-column gap-1">
+      {% if fornecedor.email %}
+        <a href="mailto:{{ fornecedor.email }}" class="text-decoration-none small text-secondary hover-primary">
+          <i class="bi bi-envelope-at me-1"></i> {{ fornecedor.email }}
         </a>
       {% endif %}
+      
+      {% if fornecedor.telefone %}
+        <span class="small text-secondary">
+          <i class="bi bi-telephone me-1"></i> {{ fornecedor.telefone }}
+        </span>
+      {% endif %}
+      
+      {% if not fornecedor.email and not fornecedor.telefone %}
+        <span class="text-muted opacity-50 small">-</span>
+      {% endif %}
+    </div>
+  </td>
+
+  <td class="text-end pe-4">
+    <div class="d-inline-flex gap-2">
+      {% if perms.estoque.change_fornecedor %}
+        <a href="{% url 'fornecedor_edit' fornecedor.pk %}" class="btn btn-icon btn-light text-primary border-0 bg-primary bg-opacity-10 hover-primary" title="Editar">
+          <i class="bi bi-pencil-fill"></i>
+        </a>
+      {% endif %}
+      
       {% if perms.estoque.delete_fornecedor %}
-          <a href="javascript:void(0);" class="btn btn-sm btn-outline-danger d-flex align-items-center gap-1" 
-          data-url="{% url 'fornecedor_delete' fornecedor.pk %}" 
-          data-nome="{{ fornecedor.nome }}" 
-          onclick="confirmarExclusao(this.dataset.url, this.dataset.nome)">
-        <i class="bi bi-trash"></i> Excluir
-      </a>   
+        <button type="button" 
+                class="btn btn-icon btn-light text-danger border-0 bg-danger bg-opacity-10 hover-danger" 
+                title="Excluir"
+                data-url="{% url 'fornecedor_delete' fornecedor.pk %}" 
+                data-nome="{{ fornecedor.nome }}" 
+                onclick="confirmarExclusao(this.dataset.url, this.dataset.nome)">
+          <i class="bi bi-trash-fill"></i>
+        </button>
       {% endif %}
     </div>
   </td>
 </tr>
 {% empty %}
-<tr><td colspan="5" class="text-center text-muted py-3">Nenhum fornecedor cadastrado.</td></tr>
+<tr>
+  <td colspan="4" class="text-center py-5">
+    <div class="text-muted opacity-50">
+      <i class="bi bi-shop fs-1 d-block mb-3"></i>
+      <p class="mb-0">Nenhum fornecedor cadastrado.</p>
+    </div>
+  </td>
+</tr>
 {% endfor %}

@@ -1,41 +1,65 @@
 {% extends 'base.html' %}
 {% load crispy_forms_tags %}
 
+{% block title %}
+  {% if item %}Editar Item{% else %}Novo Item{% endif %} • Almoxarifado
+{% endblock %}
+
 {% block content %}
-<div class="container mt-5">
-  <div class="row justify-content-center">
-    <div class="col-md-8 col-lg-6">
+<div class="row justify-content-center">
+  <div class="col-lg-8 col-xl-7">
 
-      <div class="card shadow-lg border-0 rounded-4">
-        <div class="card-body p-4">
-          <h3 class="text-center mb-4 text-primary fw-bold">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+      <div class="d-flex align-items-center gap-3">
+        <div class="rounded-circle d-flex align-items-center justify-content-center shadow-sm text-white 
+                    {% if item %}bg-warning{% else %}bg-success{% endif %}" 
+             style="width: 50px; height: 50px; font-size: 1.5rem;">
+          <i class="bi {% if item %}bi-pencil-square{% else %}bi-plus-lg{% endif %}"></i>
+        </div>
+        <div>
+          <h2 class="fw-bold text-dark mb-0">
+            {% if item %}Editar Item{% else %}Novo Item{% endif %}
+          </h2>
+          <p class="text-muted mb-0 small">
             {% if item %}
-              ✏️ Editar Item
+              Alterando dados do item código <strong>{{ item.codigo }}</strong>
             {% else %}
-              ➕ Novo Item
+              Preencha os dados para adicionar ao estoque
             {% endif %}
-          </h3>
-
-          <form method="post" novalidate>
-            {% csrf_token %}
-            {{ form|crispy }}
-
-            <div class="d-flex justify-content-between mt-4">
-              <a href="{% url 'index' %}" class="btn btn-outline-secondary">
-                <i class="bi bi-arrow-left"></i> Cancelar
-              </a>
-              <button type="submit" class="btn btn-primary">
-                <i class="bi bi-save"></i> Salvar
-              </button>
-            </div>
-          </form>
+          </p>
         </div>
       </div>
-
+      
+      <a href="{% url 'index' %}" class="btn btn-outline-secondary border-0 shadow-sm">
+        <i class="bi bi-arrow-left me-1"></i> Voltar
+      </a>
     </div>
+
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden" 
+         style="border-top: 5px solid {% if item %}var(--bs-warning){% else %}var(--bs-success){% endif %} !important;">
+      
+      <div class="card-body p-4 p-lg-5">
+        <form method="post" novalidate>
+          {% csrf_token %}
+          
+          {{ form|crispy }}
+
+          <hr class="my-4 border-light">
+
+          <div class="d-flex justify-content-end gap-2">
+            <a href="{% url 'index' %}" class="btn btn-light text-secondary border-0">
+              Cancelar
+            </a>
+            <button type="submit" class="btn px-4 shadow-sm text-white fw-bold
+                           {% if item %}btn-warning{% else %}btn-success{% endif %}">
+              <i class="bi {% if item %}bi-check-circle{% else %}bi-plus-circle{% endif %} me-1"></i> 
+              {% if item %}Salvar Alterações{% else %}Cadastrar Item{% endif %}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
   </div>
 </div>
-
-<!-- Bootstrap Icons -->
-<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
 {% endblock %}
