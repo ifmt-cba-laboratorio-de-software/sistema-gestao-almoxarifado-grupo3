@@ -55,10 +55,12 @@
               <tr>
                 <td>{{ m.data|date:"d/m/Y H:i" }}</td>
                 <td>
-                  {% if m.tipo == 'E' %}
-                    <span class="badge bg-success">Entrada</span>
+                  <small class="text-muted">Debug: "{{ m.tipo }}"</small>
+
+                  {% if m.tipo == 'ENTRADA' or m.tipo == 'DEVOLUCAO' %}
+                    <span class="badge bg-success">{{ m.get_tipo_display }}</span>
                   {% else %}
-                    <span class="badge bg-danger">Saída</span>
+                    <span class="badge bg-danger">{{ m.get_tipo_display }}</span>
                   {% endif %}
                 </td>
                 <td>{{ m.quantidade }}</td>
@@ -72,7 +74,6 @@
           </tbody>
         </table>
       </div>
-
     </div>
   </div>
 </div>

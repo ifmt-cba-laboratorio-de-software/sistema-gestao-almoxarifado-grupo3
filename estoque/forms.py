@@ -1,5 +1,6 @@
 from django import forms
 from .models import Fornecedor, Item, Movimentacao
+import re
 
 class ItemForm(forms.ModelForm):
     class Meta:
