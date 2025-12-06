@@ -1,0 +1,155 @@
+{% extends 'base.html' %}
+{% load l10n %}
+
+{% block title %}Dashboard Gerencial • Almoxarifado{% endblock %}
+
+{% block content %}
+<div class="row mb-4 align-items-center">
+  <div class="col-md-6">
+    <h2 class="fw-bold text-dark mb-1">Visão Geral</h2>
+    <p class="text-muted mb-0">Acompanhe os indicadores de desempenho do estoque.</p>
+  </div>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-md-4">
+    <div class="card border-0 shadow-sm rounded-4 h-100 bg-primary text-white overflow-hidden position-relative">
+      <div class="card-body p-4 position-relative" style="z-index: 2;">
+        <h6 class="text-white-50 text-uppercase fw-bold small mb-2">Valor Patrimonial</h6>
+        <h2 class="fw-bold mb-0">R$ {{ valor_total_estoque|localize }}</h2>
+      </div>
+      <i class="bi bi-currency-dollar position-absolute text-white opacity-25" style="font-size: 6rem; top: -10px; right: -20px;"></i>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="card border-0 shadow-sm rounded-4 h-100 bg-white">
+      <div class="card-body p-4 d-flex align-items-center justify-content-between">
+        <div>
+          <h6 class="text-muted text-uppercase fw-bold small mb-2">Cadastros Ativos</h6>
+          <h2 class="fw-bold text-dark mb-0">{{ total_itens }}</h2>
+        </div>
+        <div class="rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+          <i class="bi bi-layers-fill fs-4"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="card border-0 shadow-sm rounded-4 h-100 bg-white">
+      <div class="card-body p-4 d-flex align-items-center justify-content-between">
+        <div>
+          <h6 class="text-muted text-uppercase fw-bold small mb-2">Precisa Reposição</h6>
+          <h2 class="fw-bold {% if itens_criticos > 0 %}text-danger{% else %}text-success{% endif %} mb-0">{{ itens_criticos }}</h2>
+        </div>
+        <div class="rounded-circle {% if itens_criticos > 0 %}bg-danger text-danger{% else %}bg-success text-success{% endif %} bg-opacity-10 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+          <i class="bi bi-exclamation-triangle-fill fs-4"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-8">
+    <div class="card border-0 shadow-sm rounded-4 h-100">
+      <div class="card-header bg-white border-0 py-3">
+        <h6 class="fw-bold mb-0">📊 Top 5 Maiores Estoques</h6>
+      </div>
+      <div class="card-body">
+        <canvas id="estoqueChart" style="max-height: 350px;"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-4">
+    <div class="card border-0 shadow-sm rounded-4 h-100">
+      <div class="card-header bg-white border-0 py-3 d-flex justify-content-between align-items-center">
+        <h6 class="fw-bold mb-0">⚡ Movimentações Recentes</h6>
+      </div>
+      <div class="card-body p-0">
+        <div class="list-group list-group-flush">
+          {% for mov in ultimas_movimentacoes %}
+          <div class="list-group-item border-0 px-4 py-3 d-flex align-items-start gap-3">
+            <div class="mt-1">
+              {% if mov.tipo == 'ENTRADA' %}
+                <span class="text-success"><i class="bi bi-arrow-down-circle-fill fs-5"></i></span>
+              {% elif mov.tipo == 'SAIDA' %}
+                <span class="text-danger"><i class="bi bi-arrow-up-circle-fill fs-5"></i></span>
+              {% else %}
+                <span class="text-warning"><i class="bi bi-clock-history fs-5"></i></span>
+              {% endif %}
+            </div>
+            <div class="flex-grow-1 line-height-sm">
+              <div class="fw-bold text-dark small">{{ mov.item.descricao }}</div>
+              <div class="text-muted" style="font-size: 0.8rem;">
+                {{ mov.get_tipo_display }} de <strong>{{ mov.quantidade }}</strong>
+              </div>
+              <div class="text-muted opacity-50" style="font-size: 0.7rem;">
+                {{ mov.data|date:"d/m H:i" }} • {{ mov.usuario.username }}
+              </div>
+            </div>
+          </div>
+          {% empty %}
+          <div class="text-center py-4 text-muted small">Sem dados recentes.</div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    const ctx = document.getElementById('estoqueChart');
+    
+    // Verifica se o elemento canvas existe antes de tentar desenhar
+    if(ctx) {
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          // RECEBENDO AS LISTAS DO PYTHON
+          // O filtro |safe é essencial para transformar a lista Python ['A', 'B'] em Array JS válido
+          labels: {{ grafico_labels|safe }}, 
+          
+          datasets: [{
+            label: 'Quantidade',
+            data: {{ grafico_data|safe }}, // Dados numéricos
+            backgroundColor: '#0d6efd',    // Azul Bootstrap
+            borderRadius: 6,               // Barras arredondadas
+            barThickness: 40,              // Largura fixa da barra
+            maxBarThickness: 50
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false, // Permite que o gráfico preencha a altura do card pai
+          plugins: { 
+            legend: { display: false }, // Oculta a legenda pois só tem uma cor
+            tooltip: {
+              backgroundColor: '#1e293b', // Tooltip escura moderna
+              padding: 12,
+              cornerRadius: 8
+            }
+          },
+          scales: {
+            y: { 
+              beginAtZero: true, 
+              grid: { borderDash: [2, 4] }, // Linhas tracejadas no fundo
+              ticks: { precision: 0 }       // Força números inteiros (não existe 0.5 item)
+            },
+            x: { 
+              grid: { display: false }      // Remove as linhas verticais para limpar o visual
+            }
+          }
+        }
+      });
+    }
+  });
+</script>
+{% endblock %}
